@@ -1,0 +1,9 @@
+Open Live TV is a small live-TV player for free-to-air streams that the broadcasters publish themselves, on their own servers, for the public: German public service channels (Das Erste, tagesschau24, regional ARD programmes, 3sat), Deutsche Welle, France 24, Euronews, TV5Monde, Al Jazeera, TRT, RTVE and more, in German, French, English, Spanish, Arabic and Turkish.
+
+• Plain list of channels grouped by language, favorites with a long press
+• Pause and rewind where the broadcaster offers a time-shift window
+• Works on phones, tablets and Android TV (D-pad and channel up/down keys)
+• No account, no ads, no analytics, no DRM handling, no Google services
+• Dependency: AndroidX Media3 (ExoPlayer), Apache 2.0
+
+Streams are not hosted or modified by this app. A broadcaster may limit a stream to some countries or switch it off at any time; the app then simply shows an error and retries. The complete list, with the stream host of each channel, is in the source repository.

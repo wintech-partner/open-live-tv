@@ -1,0 +1,9 @@
+Open Live TV, yayıncıların halka açık olarak kendi sunucularında yayımladığı ücretsiz canlı yayınlar için küçük bir TV oynatıcısıdır: Alman kamu kanalları (Das Erste, tagesschau24, bölgesel ARD programları, 3sat), Deutsche Welle, France 24, Euronews, TV5Monde, Al Jazeera, TRT, RTVE ve daha fazlası; Almanca, Fransızca, İngilizce, İspanyolca, Arapça ve Türkçe.
+
+• Dillere göre gruplanmış kanal listesi, uzun basarak favoriler
+• Yayıncı geri sarma penceresi sunuyorsa duraklatma ve geri sarma
+• Telefon, tablet ve Android TV'de çalışır (yön tuşları ve kanal yukarı/aşağı)
+• Hesap, reklam, analiz, DRM işleme ve Google hizmetleri yok
+• Bağımlılık: AndroidX Media3 (ExoPlayer), Apache 2.0
+
+Yayınlar bu uygulama tarafından barındırılmaz ya da değiştirilmez. Yayıncı bir yayını bazı ülkelerle sınırlayabilir ya da her an kapatabilir; uygulama bu durumda hata gösterip yeniden dener. Her kanalın yayın sunucusuyla birlikte tam liste kaynak kod deposundadır.

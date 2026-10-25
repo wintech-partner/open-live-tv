@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorites">★ Favoriler</string>
+    <string name="fav_added">Favorilere eklendi</string>
+    <string name="fav_removed">Favorilerden çıkarıldı</string>
+    <string name="error_retry">Bu kanal oynatılamıyor (bölgenizde engelli ya da kapalı olabilir). Yeniden deneniyor…</string>
+    <string name="about">Hakkında</string>
+    <string name="about_text">Open Live TV, yayıncıların kendi sunucularında yayımladığı ücretsiz canlı yayınları oynatır. Hesap, reklam, izleme ve DRM işleme yoktur.\n\nYayınlar bazı bölgelerle sınırlı olabilir ya da her an kapanabilir; bunu yayıncı belirler. Favorilere eklemek ya da çıkarmak için bir kanala uzun basın.\n\nKaynak kod ve yayın listesi: https://gitlab.com/wintechpartners1/open-live-tv</string>
+    <string name="close">Kapat</string>
+</resources>

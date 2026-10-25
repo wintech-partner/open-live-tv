@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Open Live TV</string>
+    <string name="favorites">★ Favorites</string>
+    <string name="fav_added">Added to favorites</string>
+    <string name="fav_removed">Removed from favorites</string>
+    <string name="error_retry">Cannot play this channel (it may be blocked in your region or offline). Retrying…</string>
+    <string name="about">About</string>
+    <string name="about_text">Open Live TV plays free-to-air live streams that the broadcasters themselves publish on their own servers. The app has no accounts, no ads, no tracking and no DRM handling.\n\nStreams can be limited to some regions or go offline at any time; that is decided by the broadcaster. Long-press a channel to add or remove it from the favorites.\n\nSource and the list of streams: https://gitlab.com/wintechpartners1/open-live-tv</string>
+    <string name="close">Close</string>
+</resources>

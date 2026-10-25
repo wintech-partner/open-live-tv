@@ -1,0 +1,212 @@
+[
+ {
+  "id": "daserste",
+  "name": "Das Erste",
+  "group": "Deutsch",
+  "url": "https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8",
+  "host": "daserste-live.ard-mcdn.de"
+ },
+ {
+  "id": "tagesschau24",
+  "name": "tagesschau24",
+  "group": "Deutsch",
+  "url": "https://tagesschau.akamaized.net/hls/live/2020115/tagesschau/tagesschau_1/master.m3u8",
+  "host": "tagesschau.akamaized.net"
+ },
+ {
+  "id": "ardalpha",
+  "name": "ARD-alpha",
+  "group": "Deutsch",
+  "url": "https://mcdn.br.de/br/fs/ard_alpha/hls/de/master.m3u8",
+  "host": "mcdn.br.de"
+ },
+ {
+  "id": "ndr",
+  "name": "NDR Fernsehen",
+  "group": "Deutsch",
+  "url": "https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8",
+  "host": "mcdn.ndr.de"
+ },
+ {
+  "id": "br",
+  "name": "BR Fernsehen",
+  "group": "Deutsch",
+  "url": "https://mcdn.br.de/br/fs/bfs_sued/hls/de/master.m3u8",
+  "host": "mcdn.br.de"
+ },
+ {
+  "id": "hr",
+  "name": "hr-fernsehen",
+  "group": "Deutsch",
+  "url": "https://hr-live.ard-mcdn.de/hr/live/hls/de/master.m3u8",
+  "host": "hr-live.ard-mcdn.de"
+ },
+ {
+  "id": "wdr",
+  "name": "WDR Fernsehen",
+  "group": "Deutsch",
+  "url": "https://wdr-live.ard-mcdn.de/wdr/live/hls/de/master.m3u8",
+  "host": "wdr-live.ard-mcdn.de"
+ },
+ {
+  "id": "3sat",
+  "name": "3sat",
+  "group": "Deutsch",
+  "url": "https://zdf-hls-18.akamaized.net/hls/live/2016501/dach/high/master.m3u8",
+  "host": "zdf-hls-18.akamaized.net"
+ },
+ {
+  "id": "dw",
+  "name": "DW",
+  "group": "Deutsch",
+  "url": "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/master.m3u8",
+  "host": "dwamdstream102.akamaized.net"
+ },
+ {
+  "id": "dw-en",
+  "name": "DW English",
+  "group": "English",
+  "url": "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/master.m3u8",
+  "host": "dwamdstream102.akamaized.net"
+ },
+ {
+  "id": "dw-es",
+  "name": "DW Español",
+  "group": "Español",
+  "url": "https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/master.m3u8",
+  "host": "dwamdstream104.akamaized.net"
+ },
+ {
+  "id": "dw-ar",
+  "name": "DW (عربي)",
+  "group": "العربية",
+  "url": "https://dwamdstream103.akamaized.net/hls/live/2015526/dwstream103/master.m3u8",
+  "host": "dwamdstream103.akamaized.net"
+ },
+ {
+  "id": "euronews-de",
+  "name": "Euronews Deutsch",
+  "group": "Deutsch",
+  "url": "https://cdn-euronews.akamaized.net/live/eds/euronews-de/25027/index.m3u8",
+  "host": "cdn-euronews.akamaized.net"
+ },
+ {
+  "id": "euronews-fr",
+  "name": "Euronews Français",
+  "group": "Français",
+  "url": "https://cdn-euronews.akamaized.net/live/eds/euronews-fr/25026/index.m3u8",
+  "host": "cdn-euronews.akamaized.net"
+ },
+ {
+  "id": "euronews-en",
+  "name": "Euronews English",
+  "group": "English",
+  "url": "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8",
+  "host": "cdn-euronews.akamaized.net"
+ },
+ {
+  "id": "euronews-es",
+  "name": "Euronews Español",
+  "group": "Español",
+  "url": "https://cdn-euronews.akamaized.net/live/eds/euronews-es/25053/index.m3u8",
+  "host": "cdn-euronews.akamaized.net"
+ },
+ {
+  "id": "africanews",
+  "name": "Africanews",
+  "group": "English",
+  "url": "https://cdn-euronews.akamaized.net/live/eds/africanews-en/25049/index.m3u8",
+  "host": "cdn-euronews.akamaized.net"
+ },
+ {
+  "id": "france24",
+  "name": "France 24",
+  "group": "Français",
+  "url": "https://live.france24.com/hls/live/2037179-b/F24_FR_HI_HLS/master_5000.m3u8",
+  "host": "live.france24.com"
+ },
+ {
+  "id": "france24-en",
+  "name": "France 24 English",
+  "group": "English",
+  "url": "https://live.france24.com/hls/live/2037218-b/F24_EN_HI_HLS/master_5000.m3u8",
+  "host": "live.france24.com"
+ },
+ {
+  "id": "france24-es",
+  "name": "France 24 Español",
+  "group": "Español",
+  "url": "https://live.france24.com/hls/live/2037220-b/F24_ES_HI_HLS/master_5000.m3u8",
+  "host": "live.france24.com"
+ },
+ {
+  "id": "france24-ar",
+  "name": "France 24 (عربي)",
+  "group": "العربية",
+  "url": "https://live.france24.com/hls/live/2037222-b/F24_AR_HI_HLS/master_5000.m3u8",
+  "host": "live.france24.com"
+ },
+ {
+  "id": "tv5info",
+  "name": "TV5Monde Info",
+  "group": "Français",
+  "url": "https://ott.tv5monde.com/Content/HLS/Live/channel(info)/variant.m3u8",
+  "host": "ott.tv5monde.com"
+ },
+ {
+  "id": "fr-tv5monde-france-belgique-suisse",
+  "name": "TV5Monde (France Belgique Suisse)",
+  "group": "Français",
+  "url": "https://ott.tv5monde.com/Content/HLS/Live/channel(fbs)/variant.m3u8",
+  "host": "ott.tv5monde.com"
+ },
+ {
+  "id": "aje",
+  "name": "Al Jazeera English",
+  "group": "English",
+  "url": "https://live-hls-apps-aje-fa.getaj.net/AJE/index.m3u8",
+  "host": "live-hls-apps-aje-fa.getaj.net"
+ },
+ {
+  "id": "aja",
+  "name": "Al Jazeera (عربي)",
+  "group": "العربية",
+  "url": "https://live-hls-apps-aja-fa.getaj.net/AJA/index.m3u8",
+  "host": "live-hls-apps-aja-fa.getaj.net"
+ },
+ {
+  "id": "trtworld",
+  "name": "TRT World",
+  "group": "English",
+  "url": "https://tv-trtworld.medya.trt.com.tr/master.m3u8",
+  "host": "tv-trtworld.medya.trt.com.tr"
+ },
+ {
+  "id": "trtarabi",
+  "name": "TRT Arabi",
+  "group": "العربية",
+  "url": "https://tv-trtarabi.medya.trt.com.tr/master.m3u8",
+  "host": "tv-trtarabi.medya.trt.com.tr"
+ },
+ {
+  "id": "tr-trt2",
+  "name": "TRT 2",
+  "group": "Türkçe",
+  "url": "https://tv-trt2.medya.trt.com.tr/master.m3u8",
+  "host": "tv-trt2.medya.trt.com.tr"
+ },
+ {
+  "id": "tr-trthaber",
+  "name": "TRT Haber",
+  "group": "Türkçe",
+  "url": "https://tv-trthaber.medya.trt.com.tr/master.m3u8",
+  "host": "tv-trthaber.medya.trt.com.tr"
+ },
+ {
+  "id": "rtve24h",
+  "name": "RTVE 24 Horas",
+  "group": "Español",
+  "url": "https://ztnr.rtve.es/ztnr/1694255.m3u8",
+  "host": "ztnr.rtve.es"
+ }
+]
