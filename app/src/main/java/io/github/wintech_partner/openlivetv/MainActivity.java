@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.media3.common.ForwardingPlayer;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
@@ -117,7 +118,24 @@ public class MainActivity extends Activity {
         });
 
         player = new ExoPlayer.Builder(this).build();
-        playerView.setPlayer(player);
+        // one media item at a time, so the controller would hide next/previous: report them as available and zap the channel list instead
+        playerView.setPlayer(new ForwardingPlayer(player) {
+            @Override public Player.Commands getAvailableCommands() {
+                return super.getAvailableCommands().buildUpon().addAll(Player.COMMAND_SEEK_TO_NEXT, Player.COMMAND_SEEK_TO_PREVIOUS,
+                        Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM, Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM).build();
+            }
+            @Override public boolean isCommandAvailable(int command) {
+                return command == Player.COMMAND_SEEK_TO_NEXT || command == Player.COMMAND_SEEK_TO_PREVIOUS
+                        || command == Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM || command == Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM
+                        || super.isCommandAvailable(command);
+            }
+            @Override public boolean hasNextMediaItem() { return true; }
+            @Override public boolean hasPreviousMediaItem() { return true; }
+            @Override public void seekToNext() { zap(1); }
+            @Override public void seekToPrevious() { zap(-1); }
+            @Override public void seekToNextMediaItem() { zap(1); }
+            @Override public void seekToPreviousMediaItem() { zap(-1); }
+        });
         player.addListener(new Player.Listener() {
             @Override public void onPlayerError(PlaybackException e) {
                 Toast.makeText(MainActivity.this, R.string.error_retry, Toast.LENGTH_SHORT).show();
