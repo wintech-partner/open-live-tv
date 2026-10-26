@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,11 +17,13 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.media3.common.C;
 import androidx.media3.common.ForwardingPlayer;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
@@ -66,6 +69,9 @@ public class MainActivity extends Activity {
     private BaseAdapter adapter;
     private String currentId = "";
     private boolean fullscreen;
+    private LinearLayout playerColumn, topBar, bottomBar;
+    private Button muteBtn, subsBtn, playBtn;
+    private boolean muted, subsOn;
     private final Runnable retry = new Runnable() { @Override public void run() { play(find(currentId)); } };
 
     @Override protected void onCreate(Bundle b) {
@@ -84,6 +90,7 @@ public class MainActivity extends Activity {
         playerView.setFullscreenButtonClickListener(new PlayerView.FullscreenButtonClickListener() {
             @Override public void onFullscreenButtonClick(boolean isFullScreen) { setFullscreen(isFullScreen); }
         });
+        buildBars();
         listView = new ListView(this);
         listView.setBackgroundColor(PANEL);
         listView.setDivider(null);
@@ -118,6 +125,7 @@ public class MainActivity extends Activity {
         });
 
         player = new ExoPlayer.Builder(this).build();
+        player.setTrackSelectionParameters(player.getTrackSelectionParameters().buildUpon().setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true).build());  // subtitles off until the button
         // one media item at a time, so the controller would hide next/previous: report them as available and zap the channel list instead
         playerView.setPlayer(new ForwardingPlayer(player) {
             @Override public Player.Commands getAvailableCommands() {
@@ -137,6 +145,7 @@ public class MainActivity extends Activity {
             @Override public void seekToPreviousMediaItem() { zap(-1); }
         });
         player.addListener(new Player.Listener() {
+            @Override public void onIsPlayingChanged(boolean playing) { playBtn.setText(playing ? "II" : "\u25B6"); }
             @Override public void onPlayerError(PlaybackException e) {
                 Toast.makeText(MainActivity.this, R.string.error_retry, Toast.LENGTH_SHORT).show();
                 handler.removeCallbacks(retry);
@@ -158,20 +167,30 @@ public class MainActivity extends Activity {
         root.removeAllViews();
         root.setOrientation(land ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
         float d = getResources().getDisplayMetrics().density;
+        playerColumn.removeAllViews();
+        playerColumn.addView(topBar);
         if (land) {
-            root.addView(playerView, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
+            playerColumn.addView(playerView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+            playerColumn.addView(bottomBar);
+            root.addView(playerColumn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
             root.addView(listView, new LinearLayout.LayoutParams((int) (300 * d), ViewGroup.LayoutParams.MATCH_PARENT));
         } else {
             int h = getResources().getDisplayMetrics().widthPixels * 9 / 16;
-            root.addView(playerView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h));
+            playerColumn.addView(playerView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h));
+            playerColumn.addView(bottomBar);
+            root.addView(playerColumn, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             root.addView(listView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         }
         listView.setVisibility(fullscreen ? View.GONE : View.VISIBLE);
+        topBar.setVisibility(fullscreen ? View.GONE : View.VISIBLE);
+        bottomBar.setVisibility(fullscreen ? View.GONE : View.VISIBLE);
     }
 
     private void setFullscreen(boolean on) {
         fullscreen = on;
         listView.setVisibility(on ? View.GONE : View.VISIBLE);
+        topBar.setVisibility(on ? View.GONE : View.VISIBLE);
+        bottomBar.setVisibility(on ? View.GONE : View.VISIBLE);
         if (on && getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         } else if (!on) {
@@ -198,6 +217,47 @@ public class MainActivity extends Activity {
         if (code == KeyEvent.KEYCODE_CHANNEL_UP || code == KeyEvent.KEYCODE_PAGE_UP) { zap(-1); return true; }
         if (code == KeyEvent.KEYCODE_CHANNEL_DOWN || code == KeyEvent.KEYCODE_PAGE_DOWN) { zap(1); return true; }
         return super.onKeyDown(code, e);
+    }
+
+    private Button bar(LinearLayout row, String label, int color, View.OnClickListener l) {
+        Button b = new Button(this);
+        b.setText(label); b.setAllCaps(false); b.setTextSize(13); b.setTextColor(0xFFFFFFFF);
+        b.setBackgroundColor(color); b.setPadding(0, 0, 0, 0); b.setMinHeight(0); b.setMinimumHeight(0); b.setMinWidth(0); b.setMinimumWidth(0);
+        b.setOnClickListener(l);
+        float d = getResources().getDisplayMetrics().density;
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, (int) (42 * d), 1f);
+        lp.setMargins((int) (2 * d), (int) (2 * d), (int) (2 * d), (int) (2 * d));
+        row.addView(b, lp);
+        return b;
+    }
+
+    /** Button rows above and below the video: zap, mute, subtitles, full screen / volume, pause, seek, live. */
+    private void buildBars() {
+        final int BLUE = 0xFF2D6CDF, ORANGE = 0xFFE67E22, GREEN = 0xFF2E9E4F, YELLOW = 0xFFB8860B, GREY = 0xFF3A434F, PURPLE = 0xFF8E44AD;
+        playerColumn = new LinearLayout(this); playerColumn.setOrientation(LinearLayout.VERTICAL); playerColumn.setBackgroundColor(BG);
+        topBar = new LinearLayout(this); topBar.setOrientation(LinearLayout.HORIZONTAL); topBar.setBackgroundColor(PANEL);
+        bottomBar = new LinearLayout(this); bottomBar.setOrientation(LinearLayout.HORIZONTAL); bottomBar.setBackgroundColor(PANEL);
+        bar(topBar, getString(R.string.btn_prev), BLUE, new View.OnClickListener() { @Override public void onClick(View v) { zap(-1); } });
+        bar(topBar, getString(R.string.btn_next), BLUE, new View.OnClickListener() { @Override public void onClick(View v) { zap(1); } });
+        muteBtn = bar(topBar, getString(R.string.btn_mute), ORANGE, new View.OnClickListener() { @Override public void onClick(View v) {
+            muted = !muted; player.setVolume(muted ? 0f : 1f); muteBtn.setBackgroundColor(muted ? ACC : ORANGE);
+        } });
+        subsBtn = bar(topBar, getString(R.string.btn_subs), GREY, new View.OnClickListener() { @Override public void onClick(View v) { toggleSubs(); } });
+        bar(topBar, getString(R.string.btn_full), YELLOW, new View.OnClickListener() { @Override public void onClick(View v) { setFullscreen(true); } });
+        final AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        bar(bottomBar, "Vol \u2212", GREY, new View.OnClickListener() { @Override public void onClick(View v) { am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI); } });
+        bar(bottomBar, "Vol +", GREY, new View.OnClickListener() { @Override public void onClick(View v) { am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI); } });
+        playBtn = bar(bottomBar, "II", GREEN, new View.OnClickListener() { @Override public void onClick(View v) { if (player.isPlaying()) player.pause(); else player.play(); } });
+        bar(bottomBar, "\u221230", PURPLE, new View.OnClickListener() { @Override public void onClick(View v) { player.seekTo(Math.max(0, player.getCurrentPosition() - 30000)); } });
+        bar(bottomBar, "+30", PURPLE, new View.OnClickListener() { @Override public void onClick(View v) { player.seekTo(player.getCurrentPosition() + 30000); } });
+        bar(bottomBar, getString(R.string.btn_live), ACC, new View.OnClickListener() { @Override public void onClick(View v) { player.seekToDefaultPosition(); player.play(); } });
+    }
+
+    private void toggleSubs() {
+        if (!player.getCurrentTracks().containsType(C.TRACK_TYPE_TEXT)) { Toast.makeText(this, R.string.no_subs, Toast.LENGTH_SHORT).show(); return; }
+        subsOn = !subsOn;
+        player.setTrackSelectionParameters(player.getTrackSelectionParameters().buildUpon().setTrackTypeDisabled(C.TRACK_TYPE_TEXT, !subsOn).build());
+        subsBtn.setBackgroundColor(subsOn ? 0xFF2E9E4F : 0xFF3A434F);
     }
 
     private void zap(int step) {

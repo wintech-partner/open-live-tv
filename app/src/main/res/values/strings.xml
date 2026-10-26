@@ -8,4 +8,11 @@
     <string name="about">About</string>
     <string name="about_text">Open Live TV plays free-to-air live streams that the broadcasters themselves publish on their own servers. The app has no accounts, no ads, no tracking and no DRM handling.\n\nStreams can be limited to some regions or go offline at any time; that is decided by the broadcaster. Long-press a channel to add or remove it from the favorites.\n\nSource and the list of streams: https://gitlab.com/wintechpartners1/open-live-tv</string>
     <string name="close">Close</string>
+    <string name="btn_prev">Prev</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_mute">Mute</string>
+    <string name="btn_subs">Subs</string>
+    <string name="btn_full">Full</string>
+    <string name="btn_live">Live</string>
+    <string name="no_subs">No subtitles in this stream</string>
 </resources>
