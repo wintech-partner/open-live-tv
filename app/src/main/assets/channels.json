@@ -308,6 +308,20 @@
   "host": "rnttwmjcin.turknet.ercdn.net"
  },
  {
+  "id": "trt1",
+  "name": "TRT 1",
+  "group": "Türkçe",
+  "url": "https://tv-trt1.medya.trt.com.tr/master.m3u8",
+  "host": "tv-trt1.medya.trt.com.tr"
+ },
+ {
+  "id": "tv8",
+  "name": "TV8",
+  "group": "Türkçe",
+  "url": "https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3",
+  "host": "tv8.daioncdn.net"
+ },
+ {
   "id": "rtve24h",
   "name": "RTVE 24 Horas",
   "group": "Español",
