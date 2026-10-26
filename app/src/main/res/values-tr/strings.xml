@@ -13,5 +13,11 @@
     <string name="btn_subs">Altyazı</string>
     <string name="btn_full">Tam ekran</string>
     <string name="btn_live">Canlı</string>
+    <string name="btn_eq">EQ</string>
+    <string name="eq_title">Equalizer</string>
+    <string name="eq_adjust">Ayarla…</string>
+    <string name="eq_save">Kaydet</string>
+    <string name="eq_save_new">Yeni olarak kaydet…</string>
+    <string name="eq_unsupported">Bu cihazda ekolayzır yok</string>
     <string name="no_subs">Bu yayında altyazı yok</string>
 </resources>

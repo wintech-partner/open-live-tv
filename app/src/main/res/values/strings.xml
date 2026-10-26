@@ -14,5 +14,11 @@
     <string name="btn_subs">Subs</string>
     <string name="btn_full">Full</string>
     <string name="btn_live">Live</string>
+    <string name="btn_eq">EQ</string>
+    <string name="eq_title">Equalizer</string>
+    <string name="eq_adjust">Adjust…</string>
+    <string name="eq_save">Save</string>
+    <string name="eq_save_new">Save as new…</string>
+    <string name="eq_unsupported">This device has no equalizer</string>
     <string name="no_subs">No subtitles in this stream</string>
 </resources>

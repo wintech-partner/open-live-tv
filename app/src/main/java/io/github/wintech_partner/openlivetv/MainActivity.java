@@ -17,7 +17,10 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.BaseAdapter;
+import android.media.audiofx.Equalizer;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -72,6 +75,8 @@ public class MainActivity extends Activity {
     private LinearLayout playerColumn, topBar, bottomBar;
     private Button muteBtn, subsBtn, playBtn;
     private boolean muted, subsOn;
+    private Equalizer eq;
+    private String eqName = "Flat";
     private final Runnable retry = new Runnable() { @Override public void run() { play(find(currentId)); } };
 
     @Override protected void onCreate(Bundle b) {
@@ -146,6 +151,7 @@ public class MainActivity extends Activity {
         });
         player.addListener(new Player.Listener() {
             @Override public void onIsPlayingChanged(boolean playing) { playBtn.setText(playing ? "II" : "\u25B6"); }
+            @Override public void onAudioSessionIdChanged(int id) { eqAttach(); }
             @Override public void onPlayerError(PlaybackException e) {
                 Toast.makeText(MainActivity.this, R.string.error_retry, Toast.LENGTH_SHORT).show();
                 handler.removeCallbacks(retry);
@@ -243,6 +249,7 @@ public class MainActivity extends Activity {
             muted = !muted; player.setVolume(muted ? 0f : 1f); muteBtn.setBackgroundColor(muted ? ACC : ORANGE);
         } });
         subsBtn = bar(topBar, getString(R.string.btn_subs), GREY, new View.OnClickListener() { @Override public void onClick(View v) { toggleSubs(); } });
+        bar(topBar, getString(R.string.btn_eq), 0xFF16A085, new View.OnClickListener() { @Override public void onClick(View v) { eqDialog(); } });
         bar(topBar, getString(R.string.btn_full), YELLOW, new View.OnClickListener() { @Override public void onClick(View v) { setFullscreen(true); } });
         final AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
         bar(bottomBar, "Vol \u2212", GREY, new View.OnClickListener() { @Override public void onClick(View v) { am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI); } });
@@ -251,6 +258,131 @@ public class MainActivity extends Activity {
         bar(bottomBar, "\u221230", PURPLE, new View.OnClickListener() { @Override public void onClick(View v) { player.seekTo(Math.max(0, player.getCurrentPosition() - 30000)); } });
         bar(bottomBar, "+30", PURPLE, new View.OnClickListener() { @Override public void onClick(View v) { player.seekTo(player.getCurrentPosition() + 30000); } });
         bar(bottomBar, getString(R.string.btn_live), ACC, new View.OnClickListener() { @Override public void onClick(View v) { player.seekToDefaultPosition(); player.play(); } });
+    }
+
+
+    // ---- Equalizer: presets for the 5 reference bands, mapped onto the device's own equalizer bands; each channel remembers its preset ----
+    private static final double[] EQ_REF_HZ = {60, 230, 910, 3600, 14000};
+    private static final String[][] EQ_BUILTIN = {
+        {"Flat", "0,0,0,0,0"}, {"News", "-4,-1,3,4,-2"}, {"Sports", "2,0,2,4,3"}, {"Movie", "5,2,-1,2,4"}, {"Music", "4,1,-1,2,4"},
+        {"Concert", "3,0,-2,3,5"}, {"Night", "-5,-2,1,2,0"}, {"Bass", "7,4,0,-1,-1"}, {"Treble", "-2,-1,0,4,7"}, {"Documentary", "-2,1,3,2,0"}};
+
+    private JSONObject eqJson(String key) {
+        try { return new JSONObject(prefs.getString(key, "{}")); } catch (Exception e) { return new JSONObject(); }
+    }
+    private List<String> eqNames() {
+        List<String> n = new ArrayList<>();
+        for (String[] p : EQ_BUILTIN) n.add(p[0]);
+        java.util.Iterator<String> it = eqJson("eq_presets").keys();
+        while (it.hasNext()) { String k = it.next(); if (!n.contains(k)) n.add(k); }
+        return n;
+    }
+    private int[] eqGains(String name) {
+        String csv = eqJson("eq_presets").optString(name, "");
+        if (csv.isEmpty()) for (String[] p : EQ_BUILTIN) if (p[0].equals(name)) csv = p[1];
+        if (csv.isEmpty()) csv = "0,0,0,0,0";
+        String[] t = csv.split(","); int[] g = new int[5];
+        for (int i = 0; i < 5; i++) g[i] = Integer.parseInt(t[i].trim());
+        return g;
+    }
+    private String eqChannelPreset(String id) {
+        String n = eqJson("eq_chan").optString(id, "Flat");
+        return eqNames().contains(n) ? n : "Flat";
+    }
+    private void eqAttach() {
+        if (player == null) return;
+        try {
+            if (eq != null) { eq.release(); eq = null; }
+            int session = player.getAudioSessionId();
+            if (session == C.AUDIO_SESSION_ID_UNSET || session == 0) return;
+            if (eqFlat(eqGains(eqName))) return;   // flat: leave the audio path untouched
+            eq = new Equalizer(0, session);
+            eq.setEnabled(true);
+            eqApplyGains(eqGains(eqName));
+        } catch (Exception e) { eq = null; }
+    }
+    private boolean eqFlat(int[] g) { for (int x : g) if (x != 0) return false; return true; }
+    /** Gain at each device band centre: linear in log-frequency between the 5 reference points. */
+    private void eqApplyGains(int[] g) {
+        if (eq == null) return;
+        short lo = eq.getBandLevelRange()[0], hi = eq.getBandLevelRange()[1];
+        for (short b = 0; b < eq.getNumberOfBands(); b++) {
+            double hz = eq.getCenterFreq(b) / 1000.0, db;
+            if (hz <= EQ_REF_HZ[0]) db = g[0];
+            else if (hz >= EQ_REF_HZ[4]) db = g[4];
+            else {
+                int i = 0;
+                while (hz > EQ_REF_HZ[i + 1]) i++;
+                double t = (Math.log(hz) - Math.log(EQ_REF_HZ[i])) / (Math.log(EQ_REF_HZ[i + 1]) - Math.log(EQ_REF_HZ[i]));
+                db = g[i] + t * (g[i + 1] - g[i]);
+            }
+            eq.setBandLevel(b, (short) Math.max(lo, Math.min(hi, Math.round(db * 100))));
+        }
+    }
+    private void eqSet(String name) {
+        eqName = name;
+        try { prefs.edit().putString("eq_chan", eqJson("eq_chan").put(currentId, name).toString()).apply(); } catch (Exception ignored) { }
+        if (eq == null) eqAttach(); else eqApplyGains(eqGains(name));
+        if (eq == null && !eqFlat(eqGains(name))) Toast.makeText(this, R.string.eq_unsupported, Toast.LENGTH_SHORT).show();
+    }
+    private void eqDialog() {
+        final List<String> names = eqNames();
+        String[] items = new String[names.size()];
+        int cur = 0;
+        for (int i = 0; i < items.length; i++) { items[i] = names.get(i); if (items[i].equals(eqName)) cur = i; }
+        new AlertDialog.Builder(this).setTitle(getString(R.string.eq_title) + " – " + (find(currentId) == null ? "" : find(currentId).name))
+            .setSingleChoiceItems(items, cur, new android.content.DialogInterface.OnClickListener() {
+                @Override public void onClick(android.content.DialogInterface d, int w) { eqSet(names.get(w)); d.dismiss(); }
+            })
+            .setPositiveButton(R.string.eq_adjust, new android.content.DialogInterface.OnClickListener() {
+                @Override public void onClick(android.content.DialogInterface d, int w) { eqAdjust(); }
+            }).setNegativeButton(R.string.close, null).show();
+    }
+    private void eqAdjust() {
+        final int[] g = eqGains(eqName);
+        LinearLayout box = new LinearLayout(this); box.setOrientation(LinearLayout.VERTICAL); box.setPadding(40, 20, 40, 0);
+        String[] label = {"60 Hz", "230 Hz", "910 Hz", "3.6 kHz", "14 kHz"};
+        for (int i = 0; i < 5; i++) {
+            final int k = i;
+            final TextView t = new TextView(this); t.setText(label[i] + "   " + g[i] + " dB"); box.addView(t);
+            SeekBar sb = new SeekBar(this); sb.setMax(24); sb.setProgress(g[i] + 12);
+            sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar s2, int p, boolean user) {
+                    g[k] = p - 12; t.setText(label[k] + "   " + g[k] + " dB");
+                    if (user) { if (eq == null) { try { eq = new Equalizer(0, player.getAudioSessionId()); eq.setEnabled(true); } catch (Exception e) { eq = null; } } eqApplyGains(g); }
+                }
+                @Override public void onStartTrackingTouch(SeekBar s2) { }
+                @Override public void onStopTrackingTouch(SeekBar s2) { }
+            });
+            box.addView(sb);
+        }
+        final String name = eqName;
+        new AlertDialog.Builder(this).setTitle(getString(R.string.eq_title) + " – " + name).setView(box)
+            .setPositiveButton(R.string.eq_save, new android.content.DialogInterface.OnClickListener() {
+                @Override public void onClick(android.content.DialogInterface d, int w) { eqStore(name, g); eqName = name; eqSet(name); }
+            })
+            .setNeutralButton(R.string.eq_save_new, new android.content.DialogInterface.OnClickListener() {
+                @Override public void onClick(android.content.DialogInterface d, int w) { eqAskName(g); }
+            })
+            .setNegativeButton(R.string.close, new android.content.DialogInterface.OnClickListener() {
+                @Override public void onClick(android.content.DialogInterface d, int w) { eqName = name; eqAttach(); }   // drop unsaved changes
+            }).show();
+    }
+    private void eqStore(String name, int[] g) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 5; i++) sb.append(i > 0 ? "," : "").append(g[i]);
+        try { prefs.edit().putString("eq_presets", eqJson("eq_presets").put(name, sb.toString()).toString()).apply(); } catch (Exception ignored) { }
+    }
+    private void eqAskName(final int[] g) {
+        final EditText in = new EditText(this); in.setSingleLine(true);
+        new AlertDialog.Builder(this).setTitle(R.string.eq_save_new).setView(in)
+            .setPositiveButton(R.string.eq_save, new android.content.DialogInterface.OnClickListener() {
+                @Override public void onClick(android.content.DialogInterface d, int w) {
+                    String n = in.getText().toString().trim();
+                    if (n.length() > 20) n = n.substring(0, 20);
+                    if (!n.isEmpty()) { eqStore(n, g); eqSet(n); }
+                }
+            }).setNegativeButton(R.string.close, null).show();
     }
 
     private void toggleSubs() {
@@ -270,6 +402,7 @@ public class MainActivity extends Activity {
     @Override protected void onStart() { super.onStart(); if (player != null) player.play(); }
     @Override protected void onDestroy() {
         handler.removeCallbacks(retry);
+        if (eq != null) { eq.release(); eq = null; }
         if (player != null) { player.release(); player = null; }
         super.onDestroy();
     }
@@ -279,6 +412,7 @@ public class MainActivity extends Activity {
         handler.removeCallbacks(retry);
         currentId = c.id;
         prefs.edit().putString("last", c.id).apply();
+        eqName = eqChannelPreset(c.id); eqAttach();
         player.setMediaItem(MediaItem.fromUri(c.url));
         player.prepare();
         player.setPlayWhenReady(true);
