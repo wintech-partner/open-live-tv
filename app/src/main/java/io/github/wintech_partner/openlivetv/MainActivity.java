@@ -442,10 +442,20 @@ public class MainActivity extends Activity {
         subsBtn.setBackgroundColor(subsOn ? 0xFF2E9E4F : 0xFF3A434F);
     }
 
+    /** Steps through the channels in the order the list shows them (grouped), not in channels.json order. */
     private void zap(int step) {
+        List<Channel> order = new ArrayList<>();
+        Map<String, List<Channel>> groups = new LinkedHashMap<>();
+        for (Channel c : channels) {
+            List<Channel> g = groups.get(c.group);
+            if (g == null) { g = new ArrayList<>(); groups.put(c.group, g); }
+            g.add(c);
+        }
+        for (List<Channel> g : groups.values()) order.addAll(g);
+        if (order.isEmpty()) return;
         int i = 0;
-        for (int k = 0; k < channels.size(); k++) if (channels.get(k).id.equals(currentId)) i = k;
-        play(channels.get((i + step + channels.size()) % channels.size()));
+        for (int k = 0; k < order.size(); k++) if (order.get(k).id.equals(currentId)) i = k;
+        play(order.get((i + step + order.size()) % order.size()));
     }
 
     @Override protected void onStop() { super.onStop(); if (player != null) player.pause(); }
