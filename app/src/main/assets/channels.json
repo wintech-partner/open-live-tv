@@ -182,6 +182,13 @@
   "host": "tv-trtworld.medya.trt.com.tr"
  },
  {
+  "id": "cgtn-en",
+  "name": "CGTN",
+  "group": "English",
+  "url": "https://english-livebkali.cgtn.com/live/encgtn.m3u8",
+  "host": "english-livebkali.cgtn.com"
+ },
+ {
   "id": "trtarabi",
   "name": "TRT Arabi",
   "group": "العربية",
