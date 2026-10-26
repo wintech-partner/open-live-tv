@@ -16,6 +16,8 @@
     <string name="btn_live">Live</string>
     <string name="btn_eq">EQ</string>
     <string name="eq_title">Equalizer</string>
+    <string name="eq_preamp">Preamp</string>
+    <string name="eq_night">Night mode (tame loud peaks, Android 9+)</string>
     <string name="eq_adjust">Adjust…</string>
     <string name="eq_save">Save</string>
     <string name="eq_save_new">Save as new…</string>

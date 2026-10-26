@@ -17,7 +17,10 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.BaseAdapter;
+import android.media.audiofx.DynamicsProcessing;
 import android.media.audiofx.Equalizer;
+import android.media.audiofx.LoudnessEnhancer;
+import android.widget.CheckBox;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.EditText;
@@ -76,6 +79,8 @@ public class MainActivity extends Activity {
     private Button muteBtn, subsBtn, playBtn;
     private boolean muted, subsOn;
     private Equalizer eq;
+    private LoudnessEnhancer boost;
+    private DynamicsProcessing night;
     private String eqName = "Flat";
     private final Runnable retry = new Runnable() { @Override public void run() { play(find(currentId)); } };
 
@@ -246,7 +251,7 @@ public class MainActivity extends Activity {
         bar(topBar, getString(R.string.btn_prev), BLUE, new View.OnClickListener() { @Override public void onClick(View v) { zap(-1); } });
         bar(topBar, getString(R.string.btn_next), BLUE, new View.OnClickListener() { @Override public void onClick(View v) { zap(1); } });
         muteBtn = bar(topBar, getString(R.string.btn_mute), ORANGE, new View.OnClickListener() { @Override public void onClick(View v) {
-            muted = !muted; player.setVolume(muted ? 0f : 1f); muteBtn.setBackgroundColor(muted ? ACC : ORANGE);
+            muted = !muted; if (muted) player.setVolume(0f); else eqVolume(eqGains(eqName)); muteBtn.setBackgroundColor(muted ? ACC : ORANGE);
         } });
         subsBtn = bar(topBar, getString(R.string.btn_subs), GREY, new View.OnClickListener() { @Override public void onClick(View v) { toggleSubs(); } });
         bar(topBar, getString(R.string.btn_eq), 0xFF16A085, new View.OnClickListener() { @Override public void onClick(View v) { eqDialog(); } });
@@ -264,8 +269,9 @@ public class MainActivity extends Activity {
     // ---- Equalizer: presets for the 5 reference bands, mapped onto the device's own equalizer bands; each channel remembers its preset ----
     private static final double[] EQ_REF_HZ = {60, 230, 910, 3600, 14000};
     private static final String[][] EQ_BUILTIN = {
-        {"Flat", "0,0,0,0,0"}, {"News", "-4,-1,3,4,-2"}, {"Sports", "2,0,2,4,3"}, {"Movie", "5,2,-1,2,4"}, {"Music", "4,1,-1,2,4"},
-        {"Concert", "3,0,-2,3,5"}, {"Night", "-5,-2,1,2,0"}, {"Bass", "7,4,0,-1,-1"}, {"Treble", "-2,-1,0,4,7"}, {"Documentary", "-2,1,3,2,0"}};
+        {"Flat", "0,0,0,0,0,0,0"}, {"News", "-4,-1,3,4,-2,0,0"}, {"Sports", "2,0,2,4,3,0,0"}, {"Movie", "5,2,-1,2,4,-2,0"}, {"Music", "4,1,-1,2,4,-1,0"},
+        {"Concert", "3,0,-2,3,5,-1,0"}, {"Night", "-5,-2,1,2,0,0,1"}, {"Bass", "7,4,0,-1,-1,-3,0"}, {"Treble", "-2,-1,0,4,7,-2,0"}, {"Documentary", "-2,1,3,2,0,0,0"}};
+    // preset = 5 band gains (dB), preamp (dB; below 0 lowers the player volume, above 0 uses LoudnessEnhancer), night mode (0/1, API 28+)
 
     private JSONObject eqJson(String key) {
         try { return new JSONObject(prefs.getString(key, "{}")); } catch (Exception e) { return new JSONObject(); }
@@ -280,9 +286,9 @@ public class MainActivity extends Activity {
     private int[] eqGains(String name) {
         String csv = eqJson("eq_presets").optString(name, "");
         if (csv.isEmpty()) for (String[] p : EQ_BUILTIN) if (p[0].equals(name)) csv = p[1];
-        if (csv.isEmpty()) csv = "0,0,0,0,0";
-        String[] t = csv.split(","); int[] g = new int[5];
-        for (int i = 0; i < 5; i++) g[i] = Integer.parseInt(t[i].trim());
+        if (csv.isEmpty()) csv = "0,0,0,0,0,0,0";
+        String[] t = csv.split(","); int[] g = new int[7];
+        for (int i = 0; i < 7 && i < t.length; i++) g[i] = Integer.parseInt(t[i].trim());
         return g;
     }
     private String eqChannelPreset(String id) {
@@ -292,19 +298,43 @@ public class MainActivity extends Activity {
     private void eqAttach() {
         if (player == null) return;
         try {
-            if (eq != null) { eq.release(); eq = null; }
+            eqRelease();
+            int[] g = eqGains(eqName);
+            eqVolume(g);
             int session = player.getAudioSessionId();
             if (session == C.AUDIO_SESSION_ID_UNSET || session == 0) return;
-            if (eqFlat(eqGains(eqName))) return;   // flat: leave the audio path untouched
+            if (eqFlat(g)) return;   // flat: leave the audio path untouched
             eq = new Equalizer(0, session);
             eq.setEnabled(true);
-            eqApplyGains(eqGains(eqName));
+            eqApplyGains(g);
         } catch (Exception e) { eq = null; }
     }
+    private void eqRelease() {
+        if (eq != null) { eq.release(); eq = null; }
+        if (boost != null) { boost.release(); boost = null; }
+        if (night != null) { night.release(); night = null; }
+    }
     private boolean eqFlat(int[] g) { for (int x : g) if (x != 0) return false; return true; }
+    /** Negative preamp = quieter player volume (kept separate from the mute button). */
+    private void eqVolume(int[] g) { if (player != null && !muted) player.setVolume(g[5] < 0 ? (float) Math.pow(10, g[5] / 20.0) : 1f); }
     /** Gain at each device band centre: linear in log-frequency between the 5 reference points. */
     private void eqApplyGains(int[] g) {
         if (eq == null) return;
+        eqVolume(g);
+        try {
+            int session = player.getAudioSessionId();
+            if (g[5] > 0 && boost == null) { boost = new LoudnessEnhancer(session); boost.setEnabled(true); }
+            if (boost != null) boost.setTargetGain(Math.max(0, g[5]) * 100);
+            if (g[6] != 0 && night == null && android.os.Build.VERSION.SDK_INT >= 28) {   // night: compress loud peaks, add make-up gain
+                DynamicsProcessing.Config cfg = new DynamicsProcessing.Config.Builder(
+                        DynamicsProcessing.VARIANT_FAVOR_FREQUENCY_RESOLUTION, 2, false, 0, false, 0, false, 0, true).build();
+                night = new DynamicsProcessing(0, session, cfg);
+                DynamicsProcessing.Limiter lim = new DynamicsProcessing.Limiter(true, true, 0, 5f, 250f, 6f, -28f, 8f);
+                for (int ch = 0; ch < 2; ch++) night.setLimiterByChannelIndex(ch, lim);
+                night.setEnabled(true);
+            }
+            if (night != null) night.setEnabled(g[6] != 0);
+        } catch (Exception ignored) { }
         short lo = eq.getBandLevelRange()[0], hi = eq.getBandLevelRange()[1];
         for (short b = 0; b < eq.getNumberOfBands(); b++) {
             double hz = eq.getCenterFreq(b) / 1000.0, db;
@@ -349,13 +379,29 @@ public class MainActivity extends Activity {
             sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override public void onProgressChanged(SeekBar s2, int p, boolean user) {
                     g[k] = p - 12; t.setText(label[k] + "   " + g[k] + " dB");
-                    if (user) { if (eq == null) { try { eq = new Equalizer(0, player.getAudioSessionId()); eq.setEnabled(true); } catch (Exception e) { eq = null; } } eqApplyGains(g); }
+                    if (user) eqLive(g);
                 }
                 @Override public void onStartTrackingTouch(SeekBar s2) { }
                 @Override public void onStopTrackingTouch(SeekBar s2) { }
             });
             box.addView(sb);
         }
+        final TextView pt = new TextView(this); pt.setText(getString(R.string.eq_preamp) + "   " + g[5] + " dB"); box.addView(pt);
+        SeekBar ps = new SeekBar(this); ps.setMax(18); ps.setProgress(g[5] + 12);
+        ps.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar s2, int p, boolean user) {
+                g[5] = p - 12; pt.setText(getString(R.string.eq_preamp) + "   " + g[5] + " dB");
+                if (user) eqLive(g);
+            }
+            @Override public void onStartTrackingTouch(SeekBar s2) { }
+            @Override public void onStopTrackingTouch(SeekBar s2) { }
+        });
+        box.addView(ps);
+        CheckBox nc = new CheckBox(this); nc.setText(R.string.eq_night); nc.setChecked(g[6] != 0); nc.setEnabled(android.os.Build.VERSION.SDK_INT >= 28);
+        nc.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
+            @Override public void onCheckedChanged(android.widget.CompoundButton b, boolean on) { g[6] = on ? 1 : 0; eqLive(g); }
+        });
+        box.addView(nc);
         final String name = eqName;
         new AlertDialog.Builder(this).setTitle(getString(R.string.eq_title) + " – " + name).setView(box)
             .setPositiveButton(R.string.eq_save, new android.content.DialogInterface.OnClickListener() {
@@ -368,9 +414,13 @@ public class MainActivity extends Activity {
                 @Override public void onClick(android.content.DialogInterface d, int w) { eqName = name; eqAttach(); }   // drop unsaved changes
             }).show();
     }
+    private void eqLive(int[] g) {   // preview while a slider moves
+        if (eq == null) { try { eq = new Equalizer(0, player.getAudioSessionId()); eq.setEnabled(true); } catch (Exception e) { eq = null; return; } }
+        eqApplyGains(g);
+    }
     private void eqStore(String name, int[] g) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 5; i++) sb.append(i > 0 ? "," : "").append(g[i]);
+        for (int i = 0; i < 7; i++) sb.append(i > 0 ? "," : "").append(g[i]);
         try { prefs.edit().putString("eq_presets", eqJson("eq_presets").put(name, sb.toString()).toString()).apply(); } catch (Exception ignored) { }
     }
     private void eqAskName(final int[] g) {
@@ -402,7 +452,7 @@ public class MainActivity extends Activity {
     @Override protected void onStart() { super.onStart(); if (player != null) player.play(); }
     @Override protected void onDestroy() {
         handler.removeCallbacks(retry);
-        if (eq != null) { eq.release(); eq = null; }
+        eqRelease();
         if (player != null) { player.release(); player = null; }
         super.onDestroy();
     }
