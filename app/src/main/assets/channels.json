@@ -161,6 +161,13 @@
   "host": "ott.tv5monde.com"
  },
  {
+  "id": "bfmtv",
+  "name": "BFM TV",
+  "group": "Français",
+  "url": "https://live-cdn-stream-euw1.bfmtv.bct.nextradiotv.com/master.m3u8",
+  "host": "live-cdn-stream-euw1.bfmtv.bct.nextradiotv.com"
+ },
+ {
   "id": "aje",
   "name": "Al Jazeera English",
   "group": "English",
@@ -189,11 +196,81 @@
   "host": "english-livebkali.cgtn.com"
  },
  {
+  "id": "nhk-world",
+  "name": "NHK World Japan",
+  "group": "English",
+  "url": "https://masterpl.hls.nhkworld.jp/hls/w/live/smarttv.m3u8",
+  "host": "masterpl.hls.nhkworld.jp"
+ },
+ {
+  "id": "abc-news-live",
+  "name": "ABC News Live (US)",
+  "group": "English",
+  "url": "https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8",
+  "host": "abc-news-dmd-streams-1.akamaized.net"
+ },
+ {
+  "id": "cbs-news-247",
+  "name": "CBS News 24/7",
+  "group": "English",
+  "url": "https://cbsn-us.cbsnstream.cbsnews.com/out/v1/55a8648e8f134e82a470f83d562deeca/master.m3u8",
+  "host": "cbsn-us.cbsnstream.cbsnews.com"
+ },
+ {
+  "id": "bloomberg-tv",
+  "name": "Bloomberg TV",
+  "group": "English",
+  "url": "https://bloomberg.com/media-manifest/streams/us.m3u8",
+  "host": "bloomberg.com"
+ },
+ {
+  "id": "alarabiya-en",
+  "name": "Al Arabiya English",
+  "group": "English",
+  "url": "https://live.alarabiya.net/alarabiapublish/english/playlist_dvr.m3u8",
+  "host": "live.alarabiya.net"
+ },
+ {
   "id": "trtarabi",
   "name": "TRT Arabi",
   "group": "العربية",
   "url": "https://tv-trtarabi.medya.trt.com.tr/master.m3u8",
   "host": "tv-trtarabi.medya.trt.com.tr"
+ },
+ {
+  "id": "skynews-ar",
+  "name": "Sky News Arabia",
+  "group": "العربية",
+  "url": "https://live-stream.skynewsarabia.com/c-horizontal-channel/horizontal-stream/index.m3u8",
+  "host": "live-stream.skynewsarabia.com"
+ },
+ {
+  "id": "alarabiya",
+  "name": "Al Arabiya",
+  "group": "العربية",
+  "url": "https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8",
+  "host": "live.alarabiya.net"
+ },
+ {
+  "id": "ajm",
+  "name": "Al Jazeera Mubasher",
+  "group": "العربية",
+  "url": "https://live-hls-apps-ajm-fa.getaj.net/AJM/index.m3u8",
+  "host": "live-hls-apps-ajm-fa.getaj.net"
+ },
+ {
+  "id": "alhadath",
+  "name": "Al Hadath",
+  "group": "العربية",
+  "url": "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-hadath/2ff87ec4c2f3ede35295a20637d9f8fd/index.m3u8",
+  "host": "shd-gcp-live.edgenextcdn.net"
+ },
+ {
+  "id": "cnbc-ar",
+  "name": "CNBC Arabiya",
+  "group": "العربية",
+  "url": "https://cnbc-live.akamaized.net/cnbc/master.m3u8",
+  "host": "cnbc-live.akamaized.net"
  },
  {
   "id": "tr-trt2",
@@ -210,10 +287,52 @@
   "host": "tv-trthaber.medya.trt.com.tr"
  },
  {
+  "id": "trt-cocuk",
+  "name": "TRT Çocuk",
+  "group": "Türkçe",
+  "url": "https://tv-trtcocuk.medya.trt.com.tr/master.m3u8",
+  "host": "tv-trtcocuk.medya.trt.com.tr"
+ },
+ {
+  "id": "ahaber",
+  "name": "A Haber",
+  "group": "Türkçe",
+  "url": "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8",
+  "host": "rnttwmjcin.turknet.ercdn.net"
+ },
+ {
+  "id": "aspor",
+  "name": "A Spor",
+  "group": "Türkçe",
+  "url": "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8",
+  "host": "rnttwmjcin.turknet.ercdn.net"
+ },
+ {
   "id": "rtve24h",
   "name": "RTVE 24 Horas",
   "group": "Español",
   "url": "https://ztnr.rtve.es/ztnr/1694255.m3u8",
   "host": "ztnr.rtve.es"
+ },
+ {
+  "id": "dw-ru",
+  "name": "DW Русский",
+  "group": "Русский",
+  "url": "https://dwamdstream110.akamaized.net/hls/live/2017971/dwstream110/master.m3u8",
+  "host": "dwamdstream110.akamaized.net"
+ },
+ {
+  "id": "euronews-ru",
+  "name": "Euronews Русский",
+  "group": "Русский",
+  "url": "https://cdn-euronews.akamaized.net/live/eds/euronews-ru/25071/index.m3u8",
+  "host": "cdn-euronews.akamaized.net"
+ },
+ {
+  "id": "currenttime",
+  "name": "Настоящее Время",
+  "group": "Русский",
+  "url": "https://rfe-ingest.akamaized.net/hls/live/2033043/tvmc05/master.m3u8",
+  "host": "rfe-ingest.akamaized.net"
  }
 ]
